@@ -119,6 +119,31 @@ fn execute_command<const MAX_FILES: usize, const MAX_DATA: usize, const N: usize
     true
 }
 
+fn run_shell<const MAX_FILES: usize, const MAX_DATA: usize, const N: usize>(
+    fs: &mut RamFs<MAX_FILES, MAX_DATA>,
+    sched: &mut Scheduler<N>,
+) -> ! {
+    let uart = uart::Uart::new(uart::UART_BASE);
+    let mut line_buf = LineBuffer::<128>::new();
+
+    kprintln!("[ironos] shell ready");
+    kprint!("ironos> ");
+
+    loop {
+        if let Some(byte) = uart.read_byte() {
+            if let Some(cmd_line) = line_buf.push(byte) {
+                kprintln!();
+                let cmd = shell::parse_command(cmd_line);
+                execute_command(cmd, fs, sched);
+                line_buf.clear();
+                kprint!("ironos> ");
+            }
+        }
+        let _ = sched.schedule_next();
+        sched.on_tick();
+    }
+}
+
 fn test_allocator() -> bool {
     let mut alloc = FrameAllocator::<2>::new(0x8040_0000);
     let f0 = alloc.alloc_frame();
