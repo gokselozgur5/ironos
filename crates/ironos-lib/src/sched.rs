@@ -95,4 +95,41 @@ impl<const N: usize> Scheduler<N> {
         }
         Err("scheduler table full")
     }
+
+    /// Schedules the next ready task using round-robin policy.
+    pub fn schedule_next(&mut self) -> Option<usize> {
+        let start = match self.current {
+            Some(idx) => (idx + 1) % N,
+            None => 0,
+        };
+
+        for offset in 0..N {
+            let idx = (start + offset) % N;
+            if self.tasks[idx].used && self.tasks[idx].state == TaskState::Ready {
+                if let Some(prev) = self.current {
+                    if self.tasks[prev].used && self.tasks[prev].state == TaskState::Running {
+                        self.tasks[prev].state = TaskState::Ready;
+                    }
+                }
+                self.tasks[idx].state = TaskState::Running;
+                self.current = Some(idx);
+                return Some(self.tasks[idx].id);
+            }
+        }
+        None
+    }
+
+    /// Increments accumulated tick count for the currently running task.
+    pub fn on_tick(&mut self) {
+        if let Some(idx) = self.current {
+            if self.tasks[idx].used && self.tasks[idx].state == TaskState::Running {
+                self.tasks[idx].ticks = self.tasks[idx].ticks.saturating_add(1);
+            }
+        }
+    }
+
+    /// Returns an iterator over all active tasks.
+    pub fn tasks(&self) -> impl Iterator<Item = &TaskEntry> {
+        self.tasks.iter().filter(|t| t.used)
+    }
 }
