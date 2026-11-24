@@ -76,8 +76,8 @@ pub fn init() {
     unsafe {
         let vec = trap_vector as *const () as usize;
         asm!("csrw stvec, {0}", in(reg) vec);
-        // Enable STIE (bit 5) in sie register
-        asm!("csrs sie, {0}", in(reg) 1usize << 5);
+        // Cleanly initialize sie register with STIE (bit 5) enabled
+        asm!("csrw sie, {0}", in(reg) 1usize << 5);
         // Enable SIE (bit 1) in sstatus register
         asm!("csrs sstatus, {0}", in(reg) 1usize << 1);
     }
@@ -94,5 +94,19 @@ extern "C" fn rust_trap_handler() {
     if scause == SCAUSE_TIMER_INTERRUPT {
         TICK_COUNT.fetch_add(1, Ordering::Relaxed);
         sbi::set_timer(sbi::rdtime() + TIMER_INTERVAL);
+    } else {
+        let sepc: u64;
+        let stval: u64;
+        unsafe {
+            asm!("csrr {0}, sepc", out(reg) sepc);
+            asm!("csrr {0}, stval", out(reg) stval);
+        }
+        crate::kprintln!(
+            "[ironos trap] unhandled scause={:#x} sepc={:#x} stval={:#x}",
+            scause,
+            sepc,
+            stval
+        );
+        sbi::shutdown();
     }
 }
