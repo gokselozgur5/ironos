@@ -20,7 +20,11 @@ impl<const WORDS: usize> FrameAllocator<WORDS> {
 
     /// Creates a new frame allocator covering `TOTAL_FRAMES` from `base_paddr`.
     #[must_use]
-    pub const fn new(base_paddr: usize) -> Self {
+    pub fn new(base_paddr: usize) -> Self {
+        assert!(
+            base_paddr.is_multiple_of(PAGE_SIZE),
+            "base_paddr must be 4 KiB aligned"
+        );
         Self {
             base_paddr,
             bitmap: [0u64; WORDS],
@@ -49,10 +53,13 @@ impl<const WORDS: usize> FrameAllocator<WORDS> {
         for (word_idx, word) in self.bitmap.iter_mut().enumerate() {
             if *word != u64::MAX {
                 let bit_idx = (!*word).trailing_zeros() as usize;
+                let frame_idx = word_idx * 64 + bit_idx;
+                let paddr = frame_idx
+                    .checked_mul(PAGE_SIZE)
+                    .and_then(|off| self.base_paddr.checked_add(off))?;
                 *word |= 1u64 << bit_idx;
                 self.free_frames -= 1;
-                let frame_idx = word_idx * 64 + bit_idx;
-                return Some(self.base_paddr + frame_idx * PAGE_SIZE);
+                return Some(paddr);
             }
         }
         None
