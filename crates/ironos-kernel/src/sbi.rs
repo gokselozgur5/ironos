@@ -12,6 +12,11 @@ pub const SBI_SRST_RESET_TYPE_SHUTDOWN: usize = 0;
 /// Reset reasons for SRST.
 pub const SBI_SRST_RESET_REASON_NONE: usize = 0;
 
+/// SBI Timer Extension ID (TIME).
+pub const SBI_EXT_TIME: usize = 0x54494D45;
+/// SBI TIME Set Timer Function ID.
+pub const SBI_TIME_SET_TIMER: usize = 0;
+
 /// Legacy SBI Shutdown Extension ID.
 pub const SBI_EXT_LEGACY_SHUTDOWN: usize = 0x08;
 
@@ -32,6 +37,21 @@ pub fn sbi_call(eid: usize, fid: usize, arg0: usize, arg1: usize, arg2: usize) -
         );
     }
     (err, val)
+}
+
+/// Sets the supervisor timer for the calling hart.
+pub fn set_timer(stime: u64) {
+    let _ = sbi_call(SBI_EXT_TIME, SBI_TIME_SET_TIMER, stime as usize, 0, 0);
+}
+
+/// Reads the hardware `time` CSR.
+#[must_use]
+pub fn rdtime() -> u64 {
+    let time: u64;
+    unsafe {
+        asm!("csrr {0}, time", out(reg) time);
+    }
+    time
 }
 
 /// Shuts down the machine via OpenSBI SRST extension, falling back to legacy SBI shutdown.
