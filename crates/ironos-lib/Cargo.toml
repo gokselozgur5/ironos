@@ -1,0 +1,9 @@
+[package]
+name = "ironos-lib"
+version = "0.1.0"
+edition = "2021"
+authors = ["Goksel Ozgur <gokselozgur5@gmail.com>"]
+description = "Pure no_std kernel support library for ironos"
+license = "MIT"
+
+[dependencies]
