@@ -135,6 +135,12 @@ impl<const MAX_FILES: usize, const MAX_DATA: usize> RamFs<MAX_FILES, MAX_DATA> {
     }
 }
 
+impl<const MAX_FILES: usize, const MAX_DATA: usize> Default for RamFs<MAX_FILES, MAX_DATA> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
