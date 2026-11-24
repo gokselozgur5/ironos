@@ -134,6 +134,12 @@ impl<const N: usize> Scheduler<N> {
     }
 }
 
+impl<const N: usize> Default for Scheduler<N> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
