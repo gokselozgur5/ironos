@@ -136,3 +136,23 @@ class IronEmulator {
         }
         return [`free: invalid paddr or double-free: ${arg}`];
       }
+
+      case 'sv39': {
+        const arg = parts[1] || '0x80200000';
+        try {
+          const dec = this.decodeSv39(arg);
+          return [
+            `sv39 [${dec.vaddr}] VPN[2]=${dec.vpn2} VPN[1]=${dec.vpn1} VPN[0]=${dec.vpn0} off=${dec.offset}`,
+            `canonical=${dec.isCanonical} aligned=${dec.isAligned}`
+          ];
+        } catch {
+          return [`sv39: invalid address literal: ${arg}`];
+        }
+      }
+      case 'halt':
+        return ['[ironos] halt', 'system powered down via SBI shutdown'];
+      default:
+        return [`unknown command: ${trimmed}`];
+    }
+  }
+}
