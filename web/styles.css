@@ -215,3 +215,34 @@ header {
   background-color: var(--crt-green-dim);
   border-color: var(--crt-green);
 }
+
+/* Sv39 Translator and Register Inspector Styles */
+.sv39-box {
+  background: #111411;
+  padding: 6px;
+  border: 1px solid #222b22;
+  font-size: 11px;
+}
+
+.sv39-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 3px 0;
+}
+
+.reg-table {
+  width: 100%;
+  font-size: 11px;
+  border-collapse: collapse;
+}
+
+.reg-table td {
+  padding: 2px 4px;
+  border-bottom: 1px solid #1a201a;
+}
+
+.reg-val {
+  color: var(--crt-amber-bright);
+  text-align: right;
+  font-family: var(--font-mono);
+}
