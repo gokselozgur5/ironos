@@ -6,10 +6,10 @@ use core::ptr::{read_volatile, write_volatile};
 /// Base physical MMIO address for UART0 on QEMU virt.
 pub const UART_BASE: usize = 0x1000_0000;
 
-#[allow(dead_code)]
 const RHR: usize = 0; // Receive Holding Register (read)
 const THR: usize = 0; // Transmit Holding Register (write)
 const LSR: usize = 5; // Line Status Register
+const LSR_RX_READY: u8 = 1 << 0; // Data ready
 const LSR_TX_IDLE: u8 = 1 << 5; // Transmitter holding register empty
 
 /// NS16550A UART device wrapper.
@@ -22,6 +22,21 @@ impl Uart {
     #[must_use]
     pub const fn new(base: usize) -> Self {
         Self { base }
+    }
+
+    /// Reads a byte from UART RX holding register if data is ready.
+    #[must_use]
+    pub fn read_byte(&self) -> Option<u8> {
+        let lsr_ptr = (self.base + LSR) as *const u8;
+        let rhr_ptr = (self.base + RHR) as *const u8;
+
+        unsafe {
+            if (read_volatile(lsr_ptr) & LSR_RX_READY) != 0 {
+                Some(read_volatile(rhr_ptr))
+            } else {
+                None
+            }
+        }
     }
 
     /// Writes a single byte over UART, busy-waiting until TX is ready.
