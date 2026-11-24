@@ -156,3 +156,24 @@ class IronEmulator {
     }
   }
 }
+
+
+// UI Controller, DOM bindings, and Terminal Loop
+document.addEventListener('DOMContentLoaded', () => {
+  const emu = new IronEmulator();
+  const outputEl = document.getElementById('terminal-output');
+  const inputEl = document.getElementById('terminal-input');
+  const gridEl = document.getElementById('bitmap-grid');
+  const memStatsEl = document.getElementById('mem-stats');
+  const ticksEl = document.getElementById('sys-ticks');
+  const sv39Input = document.getElementById('sv39-input');
+  const sv39Output = document.getElementById('sv39-output');
+
+  function appendOutput(text, isError = false) {
+    if (!outputEl) return;
+    const div = document.createElement('div');
+    div.textContent = text;
+    if (isError) div.style.color = '#ff4444';
+    outputEl.appendChild(div);
+    outputEl.scrollTop = outputEl.scrollHeight;
+  }
