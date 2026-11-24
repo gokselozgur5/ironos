@@ -48,3 +48,33 @@ class IronEmulator {
     this.notifyChange();
     return true;
   }
+
+  decodeSv39(vaddrBig) {
+    const vaddr = BigInt(vaddrBig);
+    const signBit = (vaddr >> 38n) & 1n;
+    const top25 = (vaddr >> 39n) & 0x1ffffffn;
+    const isCanonical = signBit === 1n ? top25 === 0x1ffffffn : top25 === 0n;
+    const vpn2 = Number((vaddr >> 30n) & 0x1ffn);
+    const vpn1 = Number((vaddr >> 21n) & 0x1ffn);
+    const vpn0 = Number((vaddr >> 12n) & 0x1ffn);
+    const offset = Number(vaddr & 0xfffn);
+    return {
+      vaddr: '0x' + vaddr.toString(16).padStart(16, '0'),
+      vpn2,
+      vpn1,
+      vpn0,
+      offset: '0x' + offset.toString(16).padStart(3, '0'),
+      isCanonical,
+      isAligned: offset === 0
+    };
+  }
+
+  notifyChange() {
+    for (const cb of this.listeners) {
+      cb();
+    }
+  }
+
+  onChange(cb) {
+    this.listeners.push(cb);
+  }
