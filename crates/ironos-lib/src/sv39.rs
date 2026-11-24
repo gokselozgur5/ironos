@@ -126,6 +126,28 @@ mod tests {
     }
 
     #[test]
+    fn test_sv39_vaddr_higher_half_canonical_roundtrip() {
+        let higher_vaddr = 0xFFFF_FFC0_8020_0000usize;
+        let decoded = Sv39VirtAddr::from_vaddr(higher_vaddr);
+        assert_eq!(decoded.to_vaddr(), higher_vaddr);
+    }
+
+    #[test]
+    fn test_page_table_entry_ppn_mask_and_invalid_leaf() {
+        let raw_invalid = PageTableEntry::R | PageTableEntry::W;
+        let pte_invalid = PageTableEntry(raw_invalid);
+        assert!(!pte_invalid.is_valid());
+        assert!(!pte_invalid.is_leaf());
+
+        let paddr = 0x0FFF_FFFF_FFFF_000usize;
+        let pte = PageTableEntry::new(paddr, PageTableEntry::V | PageTableEntry::R);
+        assert!(pte.is_valid());
+        assert!(pte.is_leaf());
+        assert_eq!(pte.ppn(), 0x0FFF_FFFF_FFFFusize);
+        assert_eq!(pte.paddr(), 0x0FFF_FFFF_FFFF_000usize);
+    }
+
+    #[test]
     fn test_page_table_entry() {
         let paddr = 0x8020_0000;
         let flags = PageTableEntry::V | PageTableEntry::R | PageTableEntry::X | PageTableEntry::A;
