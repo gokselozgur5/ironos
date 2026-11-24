@@ -78,3 +78,30 @@ class IronEmulator {
   onChange(cb) {
     this.listeners.push(cb);
   }
+
+  execute(line) {
+    const trimmed = line.trim();
+    if (!trimmed) return [];
+    this.ticks += 3;
+    const parts = trimmed.split(/\s+/);
+    const cmd = parts[0];
+    switch (cmd) {
+      case 'help':
+        return [
+          'commands: help mem ps ls cat <name> write <name> <text> ticks alloc free sv39 halt'
+        ];
+      case 'ticks':
+        return [`ticks: ${this.ticks}`];
+      case 'mem':
+        return [
+          `ramfs: ${this.ramfs.size} files, ${Array.from(this.ramfs.values()).reduce((a, b) => a + b.length, 0)} bytes used`,
+          `frames: ${this.framesAllocated}/${this.NUM_FRAMES} allocated (${(this.framesAllocated * 4)} KiB)`
+        ];
+      case 'ps':
+        return this.tasks.map(
+          t => `task ${t.id}: ${t.name} state=${t.state} ticks=${t.ticks}`
+        );
+      case 'ls':
+        return Array.from(this.ramfs.entries()).map(
+          ([k, v]) => `${k} (${v.length} bytes)`
+        );
