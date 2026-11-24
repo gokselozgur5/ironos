@@ -11,6 +11,7 @@ use ironos_lib::ringbuf::RingBuffer;
 use ironos_lib::sv39::{PageTableEntry, Sv39VirtAddr};
 
 pub mod sbi;
+pub mod trap;
 #[macro_use]
 pub mod uart;
 
