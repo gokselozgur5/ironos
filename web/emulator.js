@@ -105,3 +105,34 @@ class IronEmulator {
         return Array.from(this.ramfs.entries()).map(
           ([k, v]) => `${k} (${v.length} bytes)`
         );
+
+      case 'cat': {
+        const name = parts[1];
+        if (!name) return ['cat: missing filename'];
+        if (this.ramfs.has(name)) {
+          return [this.ramfs.get(name).replace(/\n$/, '')];
+        }
+        return [`cat: file not found: ${name}`];
+      }
+      case 'write': {
+        const name = parts[1];
+        if (!name) return ['write: missing filename'];
+        const text = parts.slice(2).join(' ');
+        this.ramfs.set(name, text + '\n');
+        this.notifyChange();
+        return [];
+      }
+      case 'alloc': {
+        const paddr = this.allocFrame();
+        if (paddr === null) return ['alloc: out of memory frames'];
+        return [`alloc: frame allocated at 0x${paddr.toString(16)}`];
+      }
+      case 'free': {
+        const arg = parts[1];
+        if (!arg) return ['free: missing paddr argument'];
+        const paddr = parseInt(arg, 16);
+        if (this.freeFrame(paddr)) {
+          return [`free: frame 0x${paddr.toString(16)} released`];
+        }
+        return [`free: invalid paddr or double-free: ${arg}`];
+      }
