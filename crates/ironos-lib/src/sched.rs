@@ -56,3 +56,43 @@ impl TaskEntry {
         self.used
     }
 }
+
+/// Fixed-slot round-robin cooperative/preemptive scheduler table.
+pub struct Scheduler<const N: usize> {
+    tasks: [TaskEntry; N],
+    current: Option<usize>,
+    next_id: usize,
+}
+
+impl<const N: usize> Scheduler<N> {
+    /// Creates an empty scheduler table.
+    #[must_use]
+    pub const fn new() -> Self {
+        Self {
+            tasks: [TaskEntry::empty(); N],
+            current: None,
+            next_id: 1,
+        }
+    }
+
+    /// Spawns a new task in the first available slot.
+    pub fn spawn(&mut self, name: &str) -> Result<usize, &'static str> {
+        let name_bytes = name.as_bytes();
+        if name_bytes.is_empty() || name_bytes.len() > MAX_TASK_NAME_LEN {
+            return Err("invalid task name length");
+        }
+        for slot in &mut self.tasks {
+            if !slot.used {
+                slot.id = self.next_id;
+                self.next_id += 1;
+                slot.name[..name_bytes.len()].copy_from_slice(name_bytes);
+                slot.name_len = name_bytes.len();
+                slot.state = TaskState::Ready;
+                slot.ticks = 0;
+                slot.used = true;
+                return Ok(slot.id);
+            }
+        }
+        Err("scheduler table full")
+    }
+}
