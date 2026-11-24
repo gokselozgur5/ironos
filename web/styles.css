@@ -149,3 +149,28 @@ header {
 @keyframes crt-blink {
   50% { opacity: 0; }
 }
+
+/* Control Toolbar and Quick Buttons */
+.controls-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--panel-border);
+}
+
+.btn-retro {
+  background: #191c19;
+  border: 1px solid var(--crt-amber-dim);
+  color: var(--crt-amber);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.btn-retro:hover {
+  background: var(--crt-amber-dim);
+  color: #000;
+}
