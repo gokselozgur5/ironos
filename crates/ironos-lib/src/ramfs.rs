@@ -79,4 +79,35 @@ impl<const MAX_FILES: usize, const MAX_DATA: usize> RamFs<MAX_FILES, MAX_DATA> {
         let idx = self.find_index(name)?;
         Some(self.files[idx].data())
     }
+
+    /// Creates a file or updates its content if it already exists.
+    pub fn create_or_write(&mut self, name: &str, data: &[u8]) -> Result<(), &'static str> {
+        let name_bytes = name.as_bytes();
+        if name_bytes.is_empty() || name_bytes.len() > MAX_NAME_LEN {
+            return Err("invalid filename length");
+        }
+        if data.len() > MAX_DATA {
+            return Err("file data exceeds maximum size");
+        }
+
+        if let Some(idx) = self.find_index(name) {
+            let slot = &mut self.files[idx];
+            slot.data[..data.len()].copy_from_slice(data);
+            slot.data_len = data.len();
+            return Ok(());
+        }
+
+        for slot in &mut self.files {
+            if !slot.used {
+                slot.name[..name_bytes.len()].copy_from_slice(name_bytes);
+                slot.name_len = name_bytes.len();
+                slot.data[..data.len()].copy_from_slice(data);
+                slot.data_len = data.len();
+                slot.used = true;
+                self.count += 1;
+                return Ok(());
+            }
+        }
+        Err("ramfs file limit reached")
+    }
 }
