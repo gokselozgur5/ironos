@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  host-tests:
+    name: Host Tests & Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install stable Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Check workspace formatting
+        run: cargo fmt --all -- --check
+
+      - name: Check kernel formatting
+        run: cargo fmt --manifest-path crates/ironos-kernel/Cargo.toml -- --check
+
+      - name: Run clippy on host workspace
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Run host unit tests
+        run: cargo test --workspace --locked
+
+      - name: Build documentation
+        run: RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
+
+  riscv64-qemu-boot:
+    name: RISC-V QEMU Boot Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain with riscv64 target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: riscv64gc-unknown-none-elf
+          components: clippy
+
+      - name: Run clippy on kernel
+        run: cargo clippy --manifest-path crates/ironos-kernel/Cargo.toml --target riscv64gc-unknown-none-elf -- -D warnings
+
+      - name: Install QEMU RISC-V emulator
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --no-install-recommends qemu-system-misc qemu-system-riscv
+
+      - name: Run QEMU smoke boot test
+        run: ./scripts/qemu-smoke.sh
