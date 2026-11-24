@@ -72,3 +72,29 @@ header {
   gap: 16px;
   font-size: 12px;
 }
+
+/* Main Workspace Layout */
+.workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.console-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--crt-bg);
+  border-right: 2px solid var(--panel-border);
+  padding: 12px;
+  overflow: hidden;
+}
+
+.side-pane {
+  width: 440px;
+  display: flex;
+  flex-direction: column;
+  background-color: #0e100e;
+  overflow-y: auto;
+  border-left: 1px solid #221c10;
+}
