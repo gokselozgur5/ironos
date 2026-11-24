@@ -177,3 +177,28 @@ document.addEventListener('DOMContentLoaded', () => {
     outputEl.appendChild(div);
     outputEl.scrollTop = outputEl.scrollHeight;
   }
+
+  function renderGrid() {
+    if (!gridEl) return;
+    gridEl.innerHTML = '';
+    for (let i = 0; i < emu.NUM_FRAMES; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'bitmap-cell';
+      const byteIdx = Math.floor(i / 8);
+      const bitMask = 1 << (i % 8);
+      const isUsed = (emu.bitmap[byteIdx] & bitMask) !== 0;
+      if (isUsed) cell.classList.add('used');
+      const paddr = emu.BASE_PADDR + i * emu.PAGE_SIZE;
+      cell.title = `Frame ${i}: 0x${paddr.toString(16)} (${isUsed ? 'USED' : 'FREE'})`;
+      cell.addEventListener('click', () => {
+        if (isUsed) {
+          emu.freeFrame(paddr);
+          appendOutput(`[ui] deallocated frame at 0x${paddr.toString(16)}`);
+        } else {
+          emu.allocFrame();
+          appendOutput(`[ui] allocated frame at 0x${paddr.toString(16)}`);
+        }
+      });
+      gridEl.appendChild(cell);
+    }
+  }
