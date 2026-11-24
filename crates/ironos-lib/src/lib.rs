@@ -7,4 +7,5 @@ pub mod allocator;
 pub mod ramfs;
 pub mod ringbuf;
 pub mod sched;
+pub mod shell;
 pub mod sv39;
