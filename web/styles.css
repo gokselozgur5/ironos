@@ -174,3 +174,44 @@ header {
   background: var(--crt-amber-dim);
   color: #000;
 }
+
+/* Inspector Cards and Memory Visualizer */
+.inspector-card {
+  padding: 10px;
+  border-bottom: 1px solid #221c10;
+}
+
+.inspector-title {
+  color: var(--crt-green);
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+}
+
+.bitmap-grid {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 3px;
+  margin: 6px 0;
+}
+
+.bitmap-cell {
+  aspect-ratio: 1;
+  background-color: #1a1e1a;
+  border: 1px solid #2b332b;
+  cursor: pointer;
+}
+
+.bitmap-cell.used {
+  background-color: var(--crt-amber);
+  box-shadow: 0 0 3px rgba(255, 176, 0, 0.7);
+}
+
+.bitmap-cell.kernel {
+  background-color: var(--crt-green-dim);
+  border-color: var(--crt-green);
+}
