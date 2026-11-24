@@ -1,0 +1,12 @@
+/* IronOS Soviet/Unix RISC-V Bare-Metal Console Theme */
+:root {
+  --bg-color: #0c0d0c;
+  --crt-amber: #ffb000;
+  --crt-amber-dim: #996a00;
+  --crt-amber-bright: #ffd24d;
+  --crt-green: #33ff33;
+  --crt-green-dim: #1a801a;
+  --crt-bg: #101210;
+  --panel-border: #44371b;
+  --font-mono: 'Courier New', Courier, monospace;
+}
