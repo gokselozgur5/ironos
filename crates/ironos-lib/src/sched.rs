@@ -167,6 +167,17 @@ mod tests {
     }
 
     #[test]
+    fn test_single_task_round_robin_keeps_running() {
+        let mut sched = Scheduler::<4>::new();
+        let id = sched.spawn("single").unwrap();
+        assert_eq!(sched.schedule_next(), Some(id));
+        sched.on_tick();
+        assert_eq!(sched.schedule_next(), Some(id));
+        sched.on_tick();
+        assert_eq!(sched.schedule_next(), Some(id));
+    }
+
+    #[test]
     fn test_scheduler_limits() {
         let mut sched = Scheduler::<2>::new();
         assert!(sched.spawn("t1").is_ok());
