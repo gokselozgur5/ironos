@@ -44,3 +44,39 @@ impl<const MAX_DATA: usize> RamFile<MAX_DATA> {
         &self.data[..self.data_len]
     }
 }
+
+/// In-memory fixed-capacity zero-alloc RAM filesystem.
+pub struct RamFs<const MAX_FILES: usize, const MAX_DATA: usize> {
+    files: [RamFile<MAX_DATA>; MAX_FILES],
+    count: usize,
+}
+
+impl<const MAX_FILES: usize, const MAX_DATA: usize> RamFs<MAX_FILES, MAX_DATA> {
+    /// Creates an empty RAM filesystem instance.
+    #[must_use]
+    pub const fn new() -> Self {
+        Self {
+            files: [RamFile::empty(); MAX_FILES],
+            count: 0,
+        }
+    }
+
+    /// Finds a file slot index by name if present.
+    #[must_use]
+    pub fn find_index(&self, name: &str) -> Option<usize> {
+        let name_bytes = name.as_bytes();
+        for (i, file) in self.files.iter().enumerate() {
+            if file.used && file.name_bytes() == name_bytes {
+                return Some(i);
+            }
+        }
+        None
+    }
+
+    /// Reads file data by name if the file exists.
+    #[must_use]
+    pub fn read(&self, name: &str) -> Option<&[u8]> {
+        let idx = self.find_index(name)?;
+        Some(self.files[idx].data())
+    }
+}
