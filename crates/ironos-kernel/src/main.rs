@@ -54,8 +54,19 @@ pub extern "C" fn kernel_main() -> ! {
         if sv39_pass { "PASS" } else { "FAIL" }
     );
 
-    kprintln!("[ironos] halt");
-    sbi::shutdown();
+    // Initialize trap handler and timer
+    trap::init();
+
+    // Initialize in-memory RamFs and populate /motd
+    let mut fs = RamFs::<8, 256>::new();
+    let _ = fs.create_or_write("motd", b"ironos riscv64 kernel ready\n");
+
+    // Initialize scheduler with idle and shell tasks
+    let mut sched = Scheduler::<8>::new();
+    let _ = sched.spawn("idle");
+    let _ = sched.spawn("shell");
+
+    run_shell(&mut fs, &mut sched);
 }
 
 fn test_allocator() -> bool {
