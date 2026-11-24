@@ -65,3 +65,37 @@ def run_smoke(elf_path: str) -> None:
                 break
             time.sleep(0.01)
         raise TimeoutError(f"Missing {pat!r} in output")
+    try:
+        read_until(b"[ironos] shell ready")
+        for c in COMMANDS:
+            p.stdin.write(f"{c}\n".encode())
+            p.stdin.flush()
+            read_until(b"ironos> " if c != "halt" else b"[ironos] halt")
+        p.wait(timeout=max(1.0, 15.0 - (time.time() - start)))
+    finally:
+        if p.poll() is None:
+            p.kill()
+        if p.stdout:
+            out.extend(p.stdout.read())
+
+    log = out.decode("utf-8", errors="replace")
+    print(f"--- QEMU BOOT LOG START ---\n{log}--- QEMU BOOT LOG END ---")
+    if p.returncode != 0:
+        raise RuntimeError(f"QEMU exited with code {p.returncode}")
+
+    for bad in ["unknown command:", "[ironos panic]", "[ironos trap]"]:
+        if bad in log:
+            raise AssertionError(f"Unexpected failure signature: {bad}")
+
+    for req in EXPECTED_OUTPUTS:
+        if req not in log:
+            raise AssertionError(f"Expected output missing: {req}")
+
+    print("[qemu-smoke] All boot smoke assertions PASSED.")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <kernel_elf>", file=sys.stderr)
+        sys.exit(1)
+    run_smoke(sys.argv[1])
