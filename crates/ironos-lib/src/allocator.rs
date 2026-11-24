@@ -110,6 +110,19 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "base_paddr must be 4 KiB aligned")]
+    fn test_unaligned_base_paddr_panics() {
+        let _ = FrameAllocator::<1>::new(0x8000_0001);
+    }
+
+    #[test]
+    fn test_alloc_frame_overflow_safety() {
+        let mut alloc = FrameAllocator::<1>::new(usize::MAX - PAGE_SIZE + 1);
+        assert!(alloc.alloc_frame().is_some());
+        assert_eq!(alloc.alloc_frame(), None);
+    }
+
+    #[test]
     fn test_out_of_range_and_alignment() {
         let mut alloc = FrameAllocator::<1>::new(0x1000);
         assert!(!alloc.free_frame(0x800)); // below base
