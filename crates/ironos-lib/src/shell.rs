@@ -101,3 +101,37 @@ impl<const N: usize> LineBuffer<N> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_commands() {
+        assert_eq!(parse_command("help"), Command::Help);
+        assert_eq!(parse_command("  mem  "), Command::Mem);
+        assert_eq!(parse_command("ps"), Command::Ps);
+        assert_eq!(parse_command("ls"), Command::Ls);
+        assert_eq!(parse_command("cat motd"), Command::Cat("motd"));
+        assert_eq!(
+            parse_command("write file hello world"),
+            Command::Write("file", "hello world")
+        );
+        assert_eq!(parse_command("ticks"), Command::Ticks);
+        assert_eq!(parse_command("halt"), Command::Halt);
+        assert_eq!(parse_command("   "), Command::Empty);
+        assert_eq!(parse_command("foo bar"), Command::Unknown("foo bar"));
+    }
+
+    #[test]
+    fn test_line_buffer_edit() {
+        let mut buf = LineBuffer::<16>::new();
+        assert_eq!(buf.push(b'h'), None);
+        assert_eq!(buf.push(b'i'), None);
+        assert_eq!(buf.push(0x7f), None); // backspace
+        assert_eq!(buf.push(b'a'), None);
+        assert_eq!(buf.push(b'\n'), Some("ha"));
+        buf.clear();
+        assert_eq!(buf.push(b'\r'), Some(""));
+    }
+}
