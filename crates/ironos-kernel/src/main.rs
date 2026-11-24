@@ -69,6 +69,56 @@ pub extern "C" fn kernel_main() -> ! {
     run_shell(&mut fs, &mut sched);
 }
 
+fn execute_command<const MAX_FILES: usize, const MAX_DATA: usize, const N: usize>(
+    cmd: Command<'_>,
+    fs: &mut RamFs<MAX_FILES, MAX_DATA>,
+    sched: &mut Scheduler<N>,
+) -> bool {
+    match cmd {
+        Command::Help => {
+            kprintln!("commands: help mem ps ls cat <name> write <name> <text> ticks halt");
+        }
+        Command::Mem => {
+            kprintln!("ramfs: {} files, {} bytes used", fs.file_count(), fs.used_bytes());
+        }
+        Command::Ps => {
+            for task in sched.tasks() {
+                kprintln!("task {}: {} state={:?} ticks={}", task.id, task.name(), task.state, task.ticks);
+            }
+        }
+        Command::Ls => {
+            for file in fs.files() {
+                kprintln!("{} ({} bytes)", file.name_str(), file.data().len());
+            }
+        }
+        Command::Cat(name) => match fs.read(name) {
+            Some(data) => {
+                if let Ok(s) = core::str::from_utf8(data) {
+                    kprint!("{}", s);
+                }
+            }
+            None => kprintln!("cat: file not found: {}", name),
+        },
+        Command::Write(name, text) => {
+            if let Err(e) = fs.create_or_write(name, text.as_bytes()) {
+                kprintln!("write: error: {}", e);
+            }
+        }
+        Command::Ticks => {
+            kprintln!("ticks: {}", trap::TICK_COUNT.load(Ordering::Relaxed));
+        }
+        Command::Halt => {
+            kprintln!("[ironos] halt");
+            sbi::shutdown();
+        }
+        Command::Empty => {}
+        Command::Unknown(cmd_str) => {
+            kprintln!("unknown command: {}", cmd_str);
+        }
+    }
+    true
+}
+
 fn test_allocator() -> bool {
     let mut alloc = FrameAllocator::<2>::new(0x8040_0000);
     let f0 = alloc.alloc_frame();
