@@ -133,3 +133,39 @@ impl<const N: usize> Scheduler<N> {
         self.tasks.iter().filter(|t| t.used)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_scheduler_spawn_and_round_robin() {
+        let mut sched = Scheduler::<4>::new();
+        let id1 = sched.spawn("idle").unwrap();
+        let id2 = sched.spawn("shell").unwrap();
+        assert_eq!(id1, 1);
+        assert_eq!(id2, 2);
+
+        assert_eq!(sched.schedule_next(), Some(id1));
+        sched.on_tick();
+        sched.on_tick();
+
+        assert_eq!(sched.schedule_next(), Some(id2));
+        sched.on_tick();
+
+        assert_eq!(sched.schedule_next(), Some(id1));
+
+        let tasks: [TaskEntry; 4] = sched.tasks;
+        assert_eq!(tasks[0].ticks, 2);
+        assert_eq!(tasks[1].ticks, 1);
+    }
+
+    #[test]
+    fn test_scheduler_limits() {
+        let mut sched = Scheduler::<2>::new();
+        assert!(sched.spawn("t1").is_ok());
+        assert!(sched.spawn("t2").is_ok());
+        assert!(sched.spawn("t3").is_err());
+        assert!(sched.spawn("a_very_long_name_exceeding_limit").is_err());
+    }
+}
