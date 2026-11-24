@@ -90,7 +90,7 @@ impl<const N: usize> LineBuffer<N> {
                 }
                 None
             }
-            b if b >= 0x20 && b < 0x7f => {
+            b if (0x20..0x7f).contains(&b) => {
                 if self.len < N {
                     self.buf[self.len] = b;
                     self.len += 1;
@@ -99,6 +99,12 @@ impl<const N: usize> LineBuffer<N> {
             }
             _ => None,
         }
+    }
+}
+
+impl<const N: usize> Default for LineBuffer<N> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
