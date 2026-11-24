@@ -48,7 +48,7 @@ extern "C" {
 /// Initializes S-mode trap vector, enables STIE in sie, and arms the first timer interrupt.
 pub fn init() {
     unsafe {
-        let vec = trap_vector as usize;
+        let vec = trap_vector as *const () as usize;
         asm!("csrw stvec, {0}", in(reg) vec);
         // Enable STIE (bit 5) in sie register
         asm!("csrs sie, {0}", in(reg) 1usize << 5);
