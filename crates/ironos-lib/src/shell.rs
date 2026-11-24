@@ -55,3 +55,49 @@ pub fn parse_command(line: &str) -> Command<'_> {
         _ => Command::Unknown(trimmed),
     }
 }
+
+/// Fixed-capacity line accumulator for interactive serial terminals.
+pub struct LineBuffer<const N: usize> {
+    buf: [u8; N],
+    len: usize,
+}
+
+impl<const N: usize> LineBuffer<N> {
+    /// Creates an empty line editor buffer.
+    #[must_use]
+    pub const fn new() -> Self {
+        Self {
+            buf: [0u8; N],
+            len: 0,
+        }
+    }
+
+    /// Resets the buffer to empty.
+    pub fn clear(&mut self) {
+        self.len = 0;
+    }
+
+    /// Appends a byte or processes editing keys; returns `Some(&str)` when newline is submitted.
+    pub fn push(&mut self, byte: u8) -> Option<&str> {
+        match byte {
+            b'\r' | b'\n' => {
+                let s = core::str::from_utf8(&self.buf[..self.len]).unwrap_or("");
+                Some(s)
+            }
+            0x08 | 0x7f => {
+                if self.len > 0 {
+                    self.len -= 1;
+                }
+                None
+            }
+            b if b >= 0x20 && b < 0x7f => {
+                if self.len < N {
+                    self.buf[self.len] = b;
+                    self.len += 1;
+                }
+                None
+            }
+            _ => None,
+        }
+    }
+}
