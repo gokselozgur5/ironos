@@ -5,9 +5,13 @@
 
 use core::arch::global_asm;
 use core::panic::PanicInfo;
+use core::sync::atomic::Ordering;
 
 use ironos_lib::allocator::FrameAllocator;
+use ironos_lib::ramfs::RamFs;
 use ironos_lib::ringbuf::RingBuffer;
+use ironos_lib::sched::Scheduler;
+use ironos_lib::shell::{self, Command, LineBuffer};
 use ironos_lib::sv39::{PageTableEntry, Sv39VirtAddr};
 
 pub mod sbi;
