@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IronOS // RISC-V 64 Bare-Metal Kernel Console</title>
+  <link rel="stylesheet" href="web/styles.css">
+</head>
+<body class="soviet-crt-theme">
+  <div class="crt-overlay" aria-hidden="true"></div>
+
+  <header class="terminal-header">
+    <div class="header-brand">
+      <span class="brand-title">IRONOS RISC-V 64</span>
+      <span class="brand-sub">S-MODE KERNEL // SV39 MMU // RAMFS V0.1</span>
+    </div>
+    <div class="header-status">
+      <span>CPU: <strong>RV64GC (VIRT)</strong></span>
+      <span>HART: <strong>#0</strong></span>
+      <span>TICKS: <strong id="val-ticks">0</strong></span>
+      <span id="badge-status" class="badge">RUNNING</span>
+    </div>
+  </header>
+
+  <main class="console-layout">
+    <section class="screen-container">
+      <div id="terminal-screen" class="terminal-screen">
+        <div class="terminal-line banner">========================================================</div>
+        <div class="terminal-line banner">IRONOS BARE-METAL RISC-V 64 KERNEL CONSOLE (QEMU VIRT)</div>
+        <div class="terminal-line banner">SV39 3-LEVEL PAGING ENABLED | RAMFS ROOT ATTACHED</div>
+        <div class="terminal-line banner">========================================================</div>
+        <div class="terminal-line text-dim">Type 'help' for command listing or click quick commands below.</div>
+        <div class="terminal-line">&nbsp;</div>
+      </div>
+      <div class="input-line">
+        <span class="prompt">ironos#</span>
+        <input type="text" id="terminal-input" autofocus autocomplete="off" spellcheck="false" placeholder="...">
+      </div>
+    </section>
+
+    <aside class="telemetry-sidebar">
+      <div class="sidebar-title">SYSTEM TELEMETRY</div>
+      
+      <div class="telemetry-card">
+        <div class="card-header">SV39 MMU TRANSLATION</div>
+        <div class="sv39-box">
+          <div class="sv39-row"><span>SATP:</span> <strong>0x8000000000080000</strong></div>
+          <div class="sv39-row"><span>VPN[2]:</span> <strong id="vpn2">0x001</strong></div>
+          <div class="sv39-row"><span>VPN[1]:</span> <strong id="vpn1">0x000</strong></div>
+          <div class="sv39-row"><span>VPN[0]:</span> <strong id="vpn0">0x080</strong></div>
+          <div class="sv39-row"><span>STATUS:</span> <strong class="text-green">PAGING ACTIVE</strong></div>
+        </div>
+      </div>
+
+      <div class="telemetry-card">
+        <div class="card-header">PHYSICAL MEMORY BITMAP</div>
+        <div class="bitmap-container" id="bitmap-container">
+          <!-- 64 frame boxes dynamically drawn -->
+        </div>
+        <div class="bitmap-legend">
+          <span><i class="dot dot-used"></i> KERNEL/PTE</span>
+          <span><i class="dot dot-free"></i> FREE</span>
+        </div>
+      </div>
+
+      <div class="quick-commands">
+        <div class="sidebar-title">QUICK SCRIPTS</div>
+        <div class="btn-grid">
+          <button class="cmd-btn" data-cmd="help">help</button>
+          <button class="cmd-btn" data-cmd="mem">mem</button>
+          <button class="cmd-btn" data-cmd="ps">ps</button>
+          <button class="cmd-btn" data-cmd="ls">ls</button>
+          <button class="cmd-btn" data-cmd="ticks">ticks</button>
+          <button class="cmd-btn" data-cmd="sv39 0x80200000">sv39 map</button>
+          <button class="cmd-btn" data-cmd="cat welcome.txt">cat welcome</button>
+          <button class="cmd-btn btn-danger" data-cmd="halt">halt</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script type="module" src="web/emulator.js"></script>
+</body>
+</html>
