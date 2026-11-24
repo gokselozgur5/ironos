@@ -98,3 +98,29 @@ header {
   overflow-y: auto;
   border-left: 1px solid #221c10;
 }
+
+/* Terminal Display and Prompt */
+#terminal-output {
+  flex: 1;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--crt-amber);
+  text-shadow: 0 0 3px rgba(255, 176, 0, 0.4);
+  margin-bottom: 8px;
+}
+
+.prompt-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.prompt-label {
+  color: var(--crt-green);
+  text-shadow: 0 0 4px rgba(51, 255, 51, 0.5);
+  font-weight: bold;
+}
