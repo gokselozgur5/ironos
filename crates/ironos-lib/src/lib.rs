@@ -4,5 +4,6 @@
 #![warn(missing_docs)]
 
 pub mod allocator;
+pub mod ramfs;
 pub mod ringbuf;
 pub mod sv39;
