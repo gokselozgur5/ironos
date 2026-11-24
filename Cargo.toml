@@ -1,0 +1,4 @@
+[workspace]
+members = ["crates/ironos-lib"]
+exclude = ["crates/ironos-kernel"]
+resolver = "2"
