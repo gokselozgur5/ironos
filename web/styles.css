@@ -124,3 +124,28 @@ header {
   text-shadow: 0 0 4px rgba(51, 255, 51, 0.5);
   font-weight: bold;
 }
+
+/* Interactive Input and Blinking Block Cursor */
+#terminal-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--crt-amber-bright);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  caret-color: var(--crt-amber);
+}
+
+.cursor-block {
+  display: inline-block;
+  width: 8px;
+  height: 15px;
+  background-color: var(--crt-amber);
+  animation: crt-blink 1s step-start infinite;
+  vertical-align: middle;
+}
+
+@keyframes crt-blink {
+  50% { opacity: 0; }
+}
