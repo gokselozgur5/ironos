@@ -79,11 +79,21 @@ fn execute_command<const MAX_FILES: usize, const MAX_DATA: usize, const N: usize
             kprintln!("commands: help mem ps ls cat <name> write <name> <text> ticks halt");
         }
         Command::Mem => {
-            kprintln!("ramfs: {} files, {} bytes used", fs.file_count(), fs.used_bytes());
+            kprintln!(
+                "ramfs: {} files, {} bytes used",
+                fs.file_count(),
+                fs.used_bytes()
+            );
         }
         Command::Ps => {
             for task in sched.tasks() {
-                kprintln!("task {}: {} state={:?} ticks={}", task.id, task.name(), task.state, task.ticks);
+                kprintln!(
+                    "task {}: {} state={:?} ticks={}",
+                    task.id,
+                    task.name(),
+                    task.state,
+                    task.ticks
+                );
             }
         }
         Command::Ls => {
