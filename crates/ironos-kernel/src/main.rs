@@ -135,6 +135,7 @@ fn run_shell<const MAX_FILES: usize, const MAX_DATA: usize, const N: usize>(
 ) -> ! {
     let uart = uart::Uart::new(uart::UART_BASE);
     let mut line_buf = LineBuffer::<128>::new();
+    let mut last_hw_ticks = trap::ticks();
 
     kprintln!("[ironos] shell ready");
     kprint!("ironos> ");
@@ -149,8 +150,12 @@ fn run_shell<const MAX_FILES: usize, const MAX_DATA: usize, const N: usize>(
                 kprint!("ironos> ");
             }
         }
-        let _ = sched.schedule_next();
-        sched.on_tick();
+        let current_ticks = trap::ticks();
+        if current_ticks != last_hw_ticks {
+            last_hw_ticks = current_ticks;
+            sched.on_tick();
+            let _ = sched.schedule_next();
+        }
     }
 }
 

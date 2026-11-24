@@ -9,6 +9,12 @@ pub static TICK_COUNT: AtomicU64 = AtomicU64::new(0);
 pub(crate) const TIMER_INTERVAL: u64 = 1_000_000;
 pub(crate) const SCAUSE_TIMER_INTERRUPT: u64 = (1 << 63) | 5;
 
+/// Returns current monotonic timer tick count.
+#[must_use]
+pub fn ticks() -> u64 {
+    TICK_COUNT.load(Ordering::Relaxed)
+}
+
 global_asm!(
     r#"
     .section .text.trap
