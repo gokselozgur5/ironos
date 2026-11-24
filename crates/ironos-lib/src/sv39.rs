@@ -32,7 +32,7 @@ impl PageTableEntry {
     /// Creates a PTE pointing to physical address `paddr` with permission `flags`.
     #[must_use]
     pub const fn new(paddr: usize, flags: u64) -> Self {
-        let ppn = (paddr >> 12) as u64;
+        let ppn = ((paddr >> 12) as u64) & 0x0FFF_FFFF_FFFF;
         Self((ppn << 10) | (flags & 0x3FF))
     }
 
@@ -51,13 +51,13 @@ impl PageTableEntry {
     /// Checks if PTE is a leaf entry (readable, writable, or executable).
     #[must_use]
     pub const fn is_leaf(&self) -> bool {
-        (self.0 & (Self::R | Self::W | Self::X)) != 0
+        self.is_valid() && (self.0 & (Self::R | Self::W | Self::X)) != 0
     }
 
     /// Returns physical page number (PPN) stored in PTE.
     #[must_use]
     pub const fn ppn(&self) -> usize {
-        ((self.0 >> 10) & 0x003F_FFFF_FFFF_FFFF) as usize
+        ((self.0 >> 10) & 0x0FFF_FFFF_FFFF) as usize
     }
 
     /// Returns physical address pointed to by this PTE.
@@ -101,7 +101,15 @@ impl Sv39VirtAddr {
     /// Encodes components back into a 64-bit canonical virtual address.
     #[must_use]
     pub const fn to_vaddr(&self) -> usize {
-        (self.vpn2 << 30) | (self.vpn1 << 21) | (self.vpn0 << 12) | self.offset
+        let v = ((self.vpn2 & 0x1FF) << 30)
+            | ((self.vpn1 & 0x1FF) << 21)
+            | ((self.vpn0 & 0x1FF) << 12)
+            | (self.offset & 0xFFF);
+        if (v & (1 << 38)) != 0 {
+            v | (!0usize << 39)
+        } else {
+            v
+        }
     }
 }
 
