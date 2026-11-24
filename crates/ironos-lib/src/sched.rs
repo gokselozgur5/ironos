@@ -116,6 +116,11 @@ impl<const N: usize> Scheduler<N> {
                 return Some(self.tasks[idx].id);
             }
         }
+        if let Some(prev) = self.current {
+            if self.tasks[prev].used && self.tasks[prev].state == TaskState::Running {
+                return Some(self.tasks[prev].id);
+            }
+        }
         None
     }
 
