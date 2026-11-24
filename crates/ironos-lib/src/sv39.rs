@@ -147,12 +147,12 @@ mod tests {
         assert!(!pte_invalid.is_valid());
         assert!(!pte_invalid.is_leaf());
 
-        let paddr = 0x0FFF_FFFF_FFFF_000usize;
+        let paddr = 0x00FF_FFFF_FFFF_F000usize;
         let pte = PageTableEntry::new(paddr, PageTableEntry::V | PageTableEntry::R);
         assert!(pte.is_valid());
         assert!(pte.is_leaf());
         assert_eq!(pte.ppn(), 0x0FFF_FFFF_FFFFusize);
-        assert_eq!(pte.paddr(), 0x0FFF_FFFF_FFFF_000usize);
+        assert_eq!(pte.paddr(), 0x00FF_FFFF_FFFF_F000usize);
     }
 
     #[test]
