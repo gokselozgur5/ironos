@@ -24,3 +24,34 @@ pub enum Command<'a> {
     /// Unknown command string.
     Unknown(&'a str),
 }
+
+/// Parses an input line into a structured [`Command`].
+#[must_use]
+pub fn parse_command(line: &str) -> Command<'_> {
+    let trimmed = line.trim();
+    if trimmed.is_empty() {
+        return Command::Empty;
+    }
+
+    let mut parts = trimmed.split_ascii_whitespace();
+    let cmd = parts.next().unwrap_or("");
+    match cmd {
+        "help" => Command::Help,
+        "mem" => Command::Mem,
+        "ps" => Command::Ps,
+        "ls" => Command::Ls,
+        "cat" => {
+            let name = parts.next().unwrap_or("");
+            Command::Cat(name)
+        }
+        "write" => {
+            let name = parts.next().unwrap_or("");
+            let rest = trimmed.strip_prefix("write").unwrap_or("").trim_start();
+            let content = rest.strip_prefix(name).unwrap_or("").trim_start();
+            Command::Write(name, content)
+        }
+        "ticks" => Command::Ticks,
+        "halt" => Command::Halt,
+        _ => Command::Unknown(trimmed),
+    }
+}
