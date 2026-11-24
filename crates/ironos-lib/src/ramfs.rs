@@ -110,4 +110,27 @@ impl<const MAX_FILES: usize, const MAX_DATA: usize> RamFs<MAX_FILES, MAX_DATA> {
         }
         Err("ramfs file limit reached")
     }
+
+    /// Returns the number of stored files.
+    #[must_use]
+    pub const fn file_count(&self) -> usize {
+        self.count
+    }
+
+    /// Returns the total bytes occupied across all stored files.
+    #[must_use]
+    pub fn used_bytes(&self) -> usize {
+        let mut total = 0;
+        for file in &self.files {
+            if file.used {
+                total += file.data_len;
+            }
+        }
+        total
+    }
+
+    /// Returns an iterator over all active files in the filesystem.
+    pub fn files(&self) -> impl Iterator<Item = &RamFile<MAX_DATA>> {
+        self.files.iter().filter(|f| f.used)
+    }
 }
