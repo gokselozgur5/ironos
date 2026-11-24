@@ -49,3 +49,26 @@ body {
   background-size: 100% 4px, 100% 100%;
   z-index: 100;
 }
+
+/* Header and Status Bar */
+header {
+  padding: 8px 16px;
+  background-color: #141714;
+  border-bottom: 2px solid var(--panel-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.system-title {
+  color: var(--crt-amber-bright);
+  text-shadow: 0 0 6px rgba(255, 176, 0, 0.6);
+}
+
+.system-status {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+}
