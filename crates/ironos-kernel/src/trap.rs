@@ -35,3 +35,38 @@ trap_vector:
     sret
     "#
 );
+
+use core::arch::asm;
+use core::sync::atomic::Ordering;
+
+use crate::sbi;
+
+extern "C" {
+    fn trap_vector();
+}
+
+/// Initializes S-mode trap vector, enables STIE in sie, and arms the first timer interrupt.
+pub fn init() {
+    unsafe {
+        let vec = trap_vector as usize;
+        asm!("csrw stvec, {0}", in(reg) vec);
+        // Enable STIE (bit 5) in sie register
+        asm!("csrs sie, {0}", in(reg) 1usize << 5);
+        // Enable SIE (bit 1) in sstatus register
+        asm!("csrs sstatus, {0}", in(reg) 1usize << 1);
+    }
+    sbi::set_timer(sbi::rdtime() + TIMER_INTERVAL);
+}
+
+#[no_mangle]
+extern "C" fn rust_trap_handler() {
+    let scause: u64;
+    unsafe {
+        asm!("csrr {0}, scause", out(reg) scause);
+    }
+
+    if scause == SCAUSE_TIMER_INTERRUPT {
+        TICK_COUNT.fetch_add(1, Ordering::Relaxed);
+        sbi::set_timer(sbi::rdtime() + TIMER_INTERVAL);
+    }
+}
