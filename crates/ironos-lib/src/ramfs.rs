@@ -134,3 +134,42 @@ impl<const MAX_FILES: usize, const MAX_DATA: usize> RamFs<MAX_FILES, MAX_DATA> {
         self.files.iter().filter(|f| f.used)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ramfs_create_read_overwrite() {
+        let mut fs = RamFs::<4, 64>::new();
+        assert_eq!(fs.file_count(), 0);
+        assert_eq!(fs.used_bytes(), 0);
+
+        fs.create_or_write("motd", b"ironos ready").unwrap();
+        assert_eq!(fs.file_count(), 1);
+        assert_eq!(fs.used_bytes(), 12);
+        assert_eq!(fs.read("motd"), Some(&b"ironos ready"[..]));
+
+        fs.create_or_write("motd", b"updated").unwrap();
+        assert_eq!(fs.file_count(), 1);
+        assert_eq!(fs.used_bytes(), 7);
+        assert_eq!(fs.read("motd"), Some(&b"updated"[..]));
+    }
+
+    #[test]
+    fn test_ramfs_limits_and_listing() {
+        let mut fs = RamFs::<2, 16>::new();
+        fs.create_or_write("f1", b"data1").unwrap();
+        fs.create_or_write("f2", b"data2").unwrap();
+        assert!(fs.create_or_write("f3", b"data3").is_err());
+        assert_eq!(fs.file_count(), 2);
+        assert!(fs.read("none").is_none());
+
+        let mut count = 0;
+        for file in fs.files() {
+            count += 1;
+            assert!(file.name_str() == "f1" || file.name_str() == "f2");
+        }
+        assert_eq!(count, 2);
+    }
+}
